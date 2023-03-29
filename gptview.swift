@@ -7,6 +7,27 @@
 
 import SwiftUI
 
+struct AppButton<TargetView: View>: View {
+    let ImageName: String
+    let TopicName: String
+    let imageres = CGFloat(150)
+    @State private var isAnimating: Bool = false
+    @State private var isActive: Bool = false
+    @State private var isLabelVisible: Bool = false
+    
+    var body: some View {
+        VStack{
+            
+                Image(ImageName).resizable()
+                    .frame(width: imageres, height: imageres)
+                    .scaleEffect(1)
+                    .padding()
+            Text(TopicName).fontWeight(.medium)
+        }
+        
+    }
+}
+
 struct ContentView21: View {
     @State private var isShowingNewScreen = false
     @State private var view1 = false
@@ -25,20 +46,22 @@ struct ContentView21: View {
                 HStack{
                     
                     VStack {
-                        
-                        Button(action: {
-                            // Handle image tap
-                            withAnimation{
-                                view1 = true
+                        VStack{
+                            Button(action: {
+                                // Handle image tap
+                                withAnimation{
+                                    view1 = true
+                                }
+                                
+                            }) {
+                                Image("one").resizable()
+                                    .frame(width: imageres, height: imageres)
+                                    .scaleEffect(1)
+                                    .padding()
+                                
                             }
-                            
-                        }) {
-                            Image("one").resizable()
-                                .frame(width: imageres, height: imageres)
-                                .scaleEffect(1)
-                                .padding()
+                            Text("Topic 1").fontWeight(.medium)
                         }
-                        Text("Topic 1").fontWeight(.medium)
                         Button(action: {
                             // Handle image tap
                             withAnimation{
@@ -135,9 +158,130 @@ extension AnyTransition {
     }
 }
 
+struct TransitionView2: View {
+    @State private var showSecondView = false
+
+    var body: some View {
+            VStack {
+                Button("Toggle Second View") {
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        self.showSecondView.toggle()
+                    }
+                }
+
+                if showSecondView {
+                    SecondView()
+                        .transition(.asymmetric(insertion: .scale(scale: 0, anchor: .center).combined(with: .opacity), removal: .scale(scale: 0, anchor: .center).combined(with: .opacity)))
+                }
+            }
+        }
+}
+
+struct TransitionView3: View {
+    @State private var showSecondView = false
+
+    var body: some View {
+        VStack {
+            Button("Toggle Second View") {
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    self.showSecondView.toggle()
+                }
+            }
+
+            if showSecondView {
+                SecondView()
+                    .transition(.slide)
+            }
+        }
+    }
+}
+
+struct TransitionView4: View {
+    @State private var showSecondView = false
+
+    var body: some View {
+        VStack {
+            Button("Toggle Second View") {
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    self.showSecondView.toggle()
+                }
+            }
+
+            if showSecondView {
+                SecondView()
+                    .transition(.asymmetric(
+                        insertion: AnyTransition.opacity.combined(with: AnyTransition.modifier(active: Rotation3DModifier(degrees: 180, axis: (x: 1, y: 0, z: 0)), identity: Rotation3DModifier(degrees: 0, axis: (x: 1, y: 0, z: 0)))),
+                        removal: AnyTransition.opacity.combined(with: AnyTransition.modifier(active: Rotation3DModifier(degrees: 180, axis: (x: 1, y: 0, z: 0)), identity: Rotation3DModifier(degrees: 0, axis: (x: 1, y: 0, z: 0))))
+                    ))
+            }
+        }
+    }
+}
+
+struct TransitionView5: View {
+    @State private var showSecondView = false
+
+    var body: some View {
+        VStack {
+            Button("Toggle Second View") {
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    self.showSecondView.toggle()
+                }
+            }
+
+            if showSecondView {
+                SecondView()
+                    .transition(.asymmetric(
+                        insertion: AnyTransition.move(edge: .trailing).combined(with: AnyTransition.scale(scale: 0.1).animation(.spring())),
+                        removal: AnyTransition.move(edge: .leading).combined(with: AnyTransition.scale(scale: 0.1).animation(.spring()))
+                    ))
+            }
+        }
+    }
+}
+
+struct TransitionView6: View {
+    @State private var showSecondView = false
+
+    var body: some View {
+        VStack {
+            Button("Toggle Second View") {
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    self.showSecondView.toggle()
+                }
+            }
+
+            if showSecondView {
+                SecondView()
+                    .transition(.asymmetric(
+                        insertion: AnyTransition.slide.combined(with: AnyTransition.rotationEffect(Angle(degrees: 360))),
+                        removal: AnyTransition.slide.combined(with: AnyTransition.rotationEffect(Angle(degrees: -360)))
+                    ))
+            }
+        }
+    }
+}
+
+struct Rotation3DModifier: ViewModifier {
+    let degrees: Double
+    let axis: (x: CGFloat, y: CGFloat, z: CGFloat)
+
+    func body(content: Content) -> some View {
+        content.rotation3DEffect(Angle(degrees: degrees), axis: axis)
+    }
+}
+
+struct SecondView: View {
+    var body: some View {
+        RoundedRectangle(cornerRadius: 10)
+            .frame(width: 200, height: 200)
+            .foregroundColor(.green)
+    }
+}
+
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView21()
+        TransitionView6()
         
         
     }
