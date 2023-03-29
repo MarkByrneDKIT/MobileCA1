@@ -7,29 +7,7 @@
 
 import SwiftUI
 
-struct AppButton<TargetView: View>: View {
-    let ImageName: String
-    let TopicName: String
-    let imageres = CGFloat(150)
-    @State private var isAnimating: Bool = false
-    @State private var isActive: Bool = false
-    @State private var isLabelVisible: Bool = false
-    
-    var body: some View {
-        VStack{
-            
-                Image(ImageName).resizable()
-                    .frame(width: imageres, height: imageres)
-                    .scaleEffect(1)
-                    .padding()
-            Text(TopicName).fontWeight(.medium)
-        }
-        
-    }
-}
-
 struct ContentView21: View {
-    @State private var isShowingNewScreen = false
     @State private var view1 = false
     @State private var view2 = false
     @State private var view3 = false
@@ -40,9 +18,11 @@ struct ContentView21: View {
     var body: some View {
         
             ZStack {
-                Color.blue
-                    .ignoresSafeArea()
-                VStack{Text("TITLE TEXT THATS REALLY LONG").font(.largeTitle).fontWeight(.heavy)
+                Image("orange")
+                    .resizable()
+                    
+                    .edgesIgnoringSafeArea(.all)
+                VStack{Text("2d 3d animating delvsadasdasd").font(.largeTitle).fontWeight(.heavy)
                 HStack{
                     
                     VStack {
@@ -51,16 +31,17 @@ struct ContentView21: View {
                                 // Handle image tap
                                 withAnimation{
                                     view1 = true
+                                    
                                 }
                                 
                             }) {
-                                Image("one").resizable()
+                                Image("2D").resizable()
                                     .frame(width: imageres, height: imageres)
                                     .scaleEffect(1)
                                     .padding()
                                 
                             }
-                            Text("Topic 1").fontWeight(.medium)
+                            Text("2d development").fontWeight(.medium)
                         }
                         Button(action: {
                             // Handle image tap
@@ -68,12 +49,12 @@ struct ContentView21: View {
                                 view2 = true
                             }
                         }) {
-                            Image("two").resizable()
+                            Image("3D").resizable()
                                 .frame(width: imageres, height: imageres)
                                 .scaleEffect(1)
                                 .padding()
                         }
-                        Text("Topic 2").fontWeight(.medium)
+                        Text("3D Development").fontWeight(.medium)
                         Button(action: {
                             // Handle image tap
                             withAnimation{
@@ -115,8 +96,8 @@ struct ContentView21: View {
                         Text("Topic 5").fontWeight(.medium)
                         Button(action: {
                             // Handle image tap
-                            withAnimation{
-                                view6 = true
+                            withAnimation(.easeInOut(duration: 0.5)) {
+                                self.view5.toggle()
                             }
                         }) {
                             Image("six").resizable()
@@ -129,7 +110,6 @@ struct ContentView21: View {
                 }
             }.sheet(isPresented: $view1, content: {
                 TopicView1().transition(.customTransition)
-                
             })
             .sheet(isPresented: $view2, content: {
                 TopicView2().transition(.customTransition)
@@ -170,7 +150,7 @@ struct TransitionView2: View {
                 }
 
                 if showSecondView {
-                    SecondView()
+                    TopicView1()
                         .transition(.asymmetric(insertion: .scale(scale: 0, anchor: .center).combined(with: .opacity), removal: .scale(scale: 0, anchor: .center).combined(with: .opacity)))
                 }
             }
@@ -189,7 +169,7 @@ struct TransitionView3: View {
             }
 
             if showSecondView {
-                SecondView()
+                TopicView1()
                     .transition(.slide)
             }
         }
@@ -240,28 +220,6 @@ struct TransitionView5: View {
     }
 }
 
-struct TransitionView6: View {
-    @State private var showSecondView = false
-
-    var body: some View {
-        VStack {
-            Button("Toggle Second View") {
-                withAnimation(.easeInOut(duration: 0.5)) {
-                    self.showSecondView.toggle()
-                }
-            }
-
-            if showSecondView {
-                SecondView()
-                    .transition(.asymmetric(
-                        insertion: AnyTransition.slide.combined(with: AnyTransition.rotationEffect(Angle(degrees: 360))),
-                        removal: AnyTransition.slide.combined(with: AnyTransition.rotationEffect(Angle(degrees: -360)))
-                    ))
-            }
-        }
-    }
-}
-
 struct Rotation3DModifier: ViewModifier {
     let degrees: Double
     let axis: (x: CGFloat, y: CGFloat, z: CGFloat)
@@ -281,7 +239,7 @@ struct SecondView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        TransitionView6()
+        ContentView21()
         
         
     }
