@@ -5,9 +5,10 @@ struct ContentView: View {
     @State private var isImageExpanded = false
     @State private var opacity = 0.0
     @State private var rotationDegrees = 0.0
+    @State private var textOffset: CGFloat = -UIScreen.main.bounds.width
     
     var body: some View {
-        ZStack{
+        ZStack {
             NavigationView {
                 VStack {
                     Text("Homepage")
@@ -15,11 +16,17 @@ struct ContentView: View {
                         .fontWeight(.bold)
                         .foregroundColor(.orange)
                         .padding(.top)
-
+                        .offset(x: textOffset)
+                        .onAppear {
+                            withAnimation(Animation.linear(duration: 5).repeatForever(autoreverses: false)) {
+                                textOffset = UIScreen.main.bounds.width
+                            }
+                        }
+                    
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 200))], spacing: 20) {
                         NavigationButton(title: "StoryBoarding", imageName: "eyes", destination: SecondView(), rotationDegrees: $rotationDegrees)
                         NavigationButton(title: "Pre-Visualistion", imageName: "pencil", destination: SecondView(), rotationDegrees: $rotationDegrees)
-                        NavigationButton(title: "2D/3D Animation", imageName: "eyes", destination: SecondView(), rotationDegrees: $rotationDegrees)
+                        NavigationButton(title: "2D/3D Animation", imageName: "3d2d", destination: SecondView(), rotationDegrees: $rotationDegrees)
                     }
                     .opacity(opacity)
                     .animation(.easeInOut(duration: 1.5), value: opacity)
@@ -80,13 +87,39 @@ struct NavigationButton<Destination: View>: View {
         .animation(.spring(), value: rotationDegrees)
     }
 }
-
 struct SecondView: View {
+    @State private var isPhotoLibraryPresented: Bool = false
+    @State private var selectedImage: UIImage?
+    
     var body: some View {
         VStack {
             Text("You're now on the second screen!")
                 .font(.largeTitle)
                 .padding()
+
+            Button(action: {
+                isPhotoLibraryPresented = true
+            }) {
+                Image(systemName: "photo.on.rectangle")
+                    .resizable()
+                    .frame(width: 30, height: 24)
+                    .foregroundColor(.white)
+                    .padding()
+            }
+            .background(Color.blue)
+            .cornerRadius(10)
+            .shadow(radius: 5)
+            .sheet(isPresented: $isPhotoLibraryPresented) {
+                ImagePicker(image: $selectedImage, sourceType: .photoLibrary)
+            }
+
+            if let selectedImage = selectedImage {
+                Image(uiImage: selectedImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 200, height: 200)
+                    .padding()
+            }
 
             Button(action: {
                 sendNotification(with: "Notification from Second View")
@@ -121,6 +154,47 @@ struct SecondView: View {
             if let error = error {
                 print("Error scheduling notification: \(error.localizedDescription)")
             }
+        }
+    }
+}
+
+struct ImagePicker: UIViewControllerRepresentable {
+    @Environment(\.presentationMode) private var presentationMode
+    @Binding var image: UIImage?
+    var sourceType: UIImagePickerController.SourceType
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.delegate = context.coordinator
+        picker.sourceType = sourceType
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {
+        // No update needed
+    }
+    
+    class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+        let parent: ImagePicker
+        
+        init(_ parent: ImagePicker) {
+            self.parent = parent
+        }
+        
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            if let uiImage = info[.originalImage] as? UIImage {
+                parent.image = uiImage
+            }
+            
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+        
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.presentationMode.wrappedValue.dismiss()
         }
     }
 }
